@@ -43,16 +43,7 @@ export class DatabaseConfig {
         this.isConnected = true;
       });
 
-      // Graceful shutdown
-      process.on("SIGINT", async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
-
-      process.on("SIGTERM", async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
+      // Graceful shutdown is handled in server.ts
     } catch (error) {
       console.error("Failed to connect to MongoDB:", error);
       throw error;

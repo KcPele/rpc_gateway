@@ -29,15 +29,19 @@ async function startServer() {
       })
     );
 
-    // Body parsing middleware
-    app.use(express.json({ limit: "10mb" }));
-    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
     // CORS configuration
     app.use(cors({ origin: true, credentials: true }));
 
     // Metrics middleware (applied to all routes)
     app.use(metricsMiddleware);
+
+    // Proxy routes BEFORE body parsing — raw body passes through directly
+    // This avoids double parse/serialize (express.json + fixRequestBody)
+    app.use("/", proxyRoutes);
+
+    // Body parsing middleware — only for non-proxy routes (auth, apps, admin)
+    app.use(express.json({ limit: "10mb" }));
+    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
     // API Documentation route
     app.get("/", (req, res) => {
@@ -118,10 +122,9 @@ async function startServer() {
       }
     });
 
-    // Routes
+    // Routes (proxy routes already mounted above, before body parsing)
     app.use("/auth", authRoutes);
     app.use("/admin", adminRoutes);
-    app.use("/", proxyRoutes); // Proxy routes handle /:chain/exec and /:chain/cons
     app.use("/apps", appRoutes);
 
     // Metrics endpoint for Prometheus

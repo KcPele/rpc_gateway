@@ -102,11 +102,16 @@ export const metricsMiddleware = (
   res.on("finish", () => {
     const duration = (Date.now() - startTime) / 1000;
 
+    // Normalize path to avoid high cardinality (strip API keys and IDs)
+    const normalizedPath = req.route?.path || (req.path || "")
+      .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "/:key")
+      .replace(/\/[0-9a-fA-F]{24}/g, "/:id");
+
     // Record HTTP metrics
     httpRequestsTotal.inc({
       user_id: userId,
-      api_key: apiKey,
-      path: req.path,
+      api_key: "aggregated",
+      path: normalizedPath,
       method: req.method,
       status_code: res.statusCode.toString(),
     });
@@ -114,23 +119,12 @@ export const metricsMiddleware = (
     httpRequestDuration.observe(
       {
         user_id: userId,
-        api_key: apiKey,
-        path: req.path,
+        api_key: "aggregated",
+        path: normalizedPath,
         method: req.method,
       },
       duration
     );
-
-    // Update daily requests gauge if user exists
-    if (user?.dailyRequests) {
-      userDailyRequests.set(
-        {
-          user_id: userId,
-          api_key: apiKey,
-        },
-        user.dailyRequests
-      );
-    }
 
     // Decrement active connections
     activeConnections.dec();
@@ -365,41 +359,6 @@ initializeCustomMetrics();
 export const getMetrics = async (req: Request, res: Response) => {
   try {
     res.set("Content-Type", prom.register.contentType);
-
-    // Force register our custom metrics with the current registry (important for tests)
-    try {
-      prom.register.registerMetric(httpRequestsTotal);
-      prom.register.registerMetric(httpRequestDuration);
-      prom.register.registerMetric(activeConnections);
-      prom.register.registerMetric(rpcRequestsTotal);
-      prom.register.registerMetric(rpcRequestDuration);
-      prom.register.registerMetric(rateLimitHits);
-      prom.register.registerMetric(userDailyRequests);
-      prom.register.registerMetric(nodeExecutionSyncing);
-      prom.register.registerMetric(nodeConsensusSyncing);
-      prom.register.registerMetric(nodeConsensusHeadSlot);
-      prom.register.registerMetric(nodeHealthStatus);
-      prom.register.registerMetric(nodePrometheusMetricsAvailable);
-      prom.register.registerMetric(nodeRuntimeGcCycles);
-      prom.register.registerMetric(nodeRuntimeHeapAllocs);
-    } catch (error: any) {
-      // Metrics might already be registered, which is fine
-      // This is expected behavior in test environments
-    }
-
-    // Always ensure default metrics are collected (important for tests)
-    const existingMetrics = prom.register.getMetricsAsArray();
-    const hasDefaultMetrics = existingMetrics.some(
-      (metric) =>
-        metric.name.includes("process_") || metric.name.includes("nodejs_")
-    );
-
-    if (!hasDefaultMetrics) {
-      prom.collectDefaultMetrics({
-        gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
-      });
-    }
-
     const metrics = await prom.register.metrics();
     res.end(metrics);
   } catch (error) {
