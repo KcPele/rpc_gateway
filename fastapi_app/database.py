@@ -37,6 +37,8 @@ class Chain(Document):
     chain_id: str
     is_enabled: bool = True
     admin_notes: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     class Settings:
         name = "chains"
