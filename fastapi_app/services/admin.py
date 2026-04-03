@@ -150,11 +150,14 @@ async def add_chain(payload: dict) -> dict:
             detail=f"Chain with name '{name}' or chainId '{chain_id}' already exists.",
         )
 
+    now = datetime.now(timezone.utc)
     new_chain = Chain(
         name=name,
         chain_id=str(chain_id),
         is_enabled=is_enabled,
         admin_notes=admin_notes,
+        created_at=now,
+        updated_at=now,
     )
     await new_chain.insert()
 
@@ -223,6 +226,7 @@ async def update_chain(chain_id: str, payload: dict) -> dict:
     if admin_notes is not None:
         chain.admin_notes = admin_notes
 
+    chain.updated_at = datetime.now(timezone.utc)
     await chain.save()
 
     return {

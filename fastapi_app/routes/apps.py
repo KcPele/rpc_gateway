@@ -90,6 +90,7 @@ async def create_app(
 
     max_rps, daily_limit = await _get_default_limits()
 
+    now = datetime.now(timezone.utc)
     new_app = App(
         name=payload.name,
         description=payload.description,
@@ -99,6 +100,8 @@ async def create_app(
         api_key=str(uuid4()),
         max_rps=max_rps,
         daily_requests_limit=daily_limit,
+        created_at=now,
+        updated_at=now,
     )
     await new_app.insert()
 
@@ -262,6 +265,7 @@ async def update_user_app(
     if payload.description is not None:
         app.description = payload.description
 
+    app.updated_at = datetime.now(timezone.utc)
     await app.save()
 
     return {

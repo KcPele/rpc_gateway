@@ -70,6 +70,7 @@ async def update_app_details(app_id: str, payload: dict) -> dict:
         if hasattr(app, key):
             setattr(app, key, value)
 
+    app.updated_at = datetime.now(timezone.utc)
     await app.save()
 
     return {
@@ -127,11 +128,13 @@ async def update_user_details(user_id: str, payload: dict) -> dict:
         if "is_active" in filtered:
             target_user.is_active = filtered.pop("is_active")
         target_user.password = User.hash_password(filtered.pop("password"))
+        target_user.updated_at = datetime.now(timezone.utc)
         await target_user.save()
     else:
         for key, value in filtered.items():
             if hasattr(target_user, key):
                 setattr(target_user, key, value)
+        target_user.updated_at = datetime.now(timezone.utc)
         await target_user.save()
 
     user_obj = {
