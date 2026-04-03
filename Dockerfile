@@ -1,13 +1,25 @@
-FROM node:18-alpine
+# ── Builder ───────────────────────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
+
+WORKDIR /build
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ── Runtime ───────────────────────────────────────────────────────────────────
+FROM python:3.12-slim
 
 WORKDIR /app
-# copy current dir items to work dir
-COPY . .
-# install all packages
-RUN yarn
-# transpile the typescript code
-RUN yarn transpile
 
-CMD ["node", "dist/server.js"]
-# port to run the app
-EXPOSE 8888
+COPY --from=builder /install /usr/local
+
+COPY requirements.txt .
+COPY fastapi_app/ ./fastapi_app/
+
+RUN useradd --create-home --shell /bin/bash appuser
+USER appuser
+
+EXPOSE 3000
+
+CMD ["uvicorn", "fastapi_app.main:app", "--host", "0.0.0.0", "--port", "3000"]

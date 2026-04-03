@@ -5,3 +5,7 @@ yarn-error.log
 .DS_Store
 
 nodebridge_frontend
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
