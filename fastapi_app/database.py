@@ -34,7 +34,7 @@ class User(Document):
 
 class Chain(Document):
     name: str
-    chain_id: str
+    chain_id: str | int | int
     is_enabled: bool = True
     admin_notes: str | None = None
     created_at: datetime | None = None

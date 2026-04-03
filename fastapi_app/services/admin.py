@@ -152,7 +152,7 @@ async def add_chain(payload: dict) -> dict:
 
     new_chain = Chain(
         name=name,
-        chain_id=chain_id,
+        chain_id=str(chain_id),
         is_enabled=is_enabled,
         admin_notes=admin_notes,
     )
