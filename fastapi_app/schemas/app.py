@@ -3,17 +3,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CreateAppRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    chain_name: str = Field(..., min_length=1, max_length=50)
-    chain_id: str = Field(..., min_length=1, max_length=50)
+    chain_name: str = Field(..., min_length=1, max_length=50, alias="chainName")
+    chain_id: str = Field(..., min_length=1, max_length=50, alias="chainId")
 
 
 class UpdateAppRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
 

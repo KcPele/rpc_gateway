@@ -3,21 +3,27 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class AddChainRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: str = Field(..., min_length=1, max_length=100)
-    chain_id: str = Field(..., min_length=1, max_length=50)
-    is_enabled: bool = True
-    admin_notes: Optional[str] = None
+    chain_id: str = Field(..., min_length=1, max_length=50, alias="chainId")
+    is_enabled: bool = Field(True, alias="isEnabled")
+    admin_notes: Optional[str] = Field(None, alias="adminNotes")
 
 
 class UpdateChainRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    new_chain_id: Optional[str] = Field(None, min_length=1, max_length=50)
-    is_enabled: Optional[bool] = None
-    admin_notes: Optional[str] = None
+    new_chain_id: Optional[str] = Field(
+        None, min_length=1, max_length=50, alias="newChainId"
+    )
+    is_enabled: Optional[bool] = Field(None, alias="isEnabled")
+    admin_notes: Optional[str] = Field(None, alias="adminNotes")
 
 
 class ChainResponse(BaseModel):
@@ -31,24 +37,30 @@ class ChainResponse(BaseModel):
 
 
 class AdminUpdateAppRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=500)
-    user_id: Optional[str] = None
-    chain_name: Optional[str] = Field(None, min_length=1, max_length=50)
-    chain_id: Optional[str] = Field(None, min_length=1, max_length=50)
-    max_rps: Optional[int] = Field(None, ge=0)
-    daily_requests_limit: Optional[int] = Field(None, ge=0)
-    is_active: Optional[bool] = None
-    api_key: Optional[str] = None
+    user_id: Optional[str] = Field(None, alias="userId")
+    chain_name: Optional[str] = Field(
+        None, min_length=1, max_length=50, alias="chainName"
+    )
+    chain_id: Optional[str] = Field(None, min_length=1, max_length=50, alias="chainId")
+    max_rps: Optional[int] = Field(None, ge=0, alias="maxRps")
+    daily_requests_limit: Optional[int] = Field(None, ge=0, alias="dailyRequestsLimit")
+    is_active: Optional[bool] = Field(None, alias="isActive")
+    api_key: Optional[str] = Field(None, alias="apiKey")
     requests: Optional[int] = Field(None, ge=0)
-    daily_requests: Optional[int] = Field(None, ge=0)
-    last_reset_date: Optional[datetime] = None
+    daily_requests: Optional[int] = Field(None, ge=0, alias="dailyRequests")
+    last_reset_date: Optional[datetime] = Field(None, alias="lastResetDate")
 
 
 class AdminUpdateUserRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=8, max_length=128)
-    is_active: Optional[bool] = None
+    is_active: Optional[bool] = Field(None, alias="isActive")
 
 
 class DefaultAppSettingsResponse(BaseModel):
@@ -60,8 +72,10 @@ class DefaultAppSettingsResponse(BaseModel):
 
 
 class UpdateDefaultAppSettingsRequest(BaseModel):
-    max_rps: Optional[int] = Field(None, gt=0)
-    daily_requests_limit: Optional[int] = Field(None, gt=0)
+    model_config = ConfigDict(populate_by_name=True)
+
+    max_rps: Optional[int] = Field(None, gt=0, alias="maxRps")
+    daily_requests_limit: Optional[int] = Field(None, gt=0, alias="dailyRequestsLimit")
 
 
 class PaginatedUsersResponse(BaseModel):
