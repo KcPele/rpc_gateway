@@ -32,6 +32,7 @@ app = FastAPI(
     version="1.0.0",
     description="Multi-tenant RPC gateway for node access",
     lifespan=lifespan,
+    redirect_slashes=False,
 )
 
 

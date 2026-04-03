@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi_app.database import App, Chain, DefaultAppSettings, User
 from fastapi_app.middleware.auth import get_current_user
 from fastapi_app.schemas.app import CreateAppRequest, UpdateAppRequest
+from fastapi_app.utils.response import fmt_dt as _fmt_dt
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 
@@ -30,8 +31,8 @@ def _app_dict(app: App) -> dict:
         "requests": app.requests,
         "dailyRequests": app.daily_requests,
         "isActive": app.is_active,
-        "createdAt": app.created_at,
-        "updatedAt": app.updated_at,
+        "createdAt": _fmt_dt(app.created_at),
+        "updatedAt": _fmt_dt(app.updated_at),
     }
 
 
@@ -49,8 +50,9 @@ def _app_with_key_dict(app: App) -> dict:
         "requests": app.requests,
         "dailyRequests": app.daily_requests,
         "isActive": app.is_active,
-        "createdAt": app.created_at,
-        "updatedAt": app.updated_at,
+        "lastResetDate": _fmt_dt(app.last_reset_date),
+        "createdAt": _fmt_dt(app.created_at),
+        "updatedAt": _fmt_dt(app.updated_at),
     }
 
 
@@ -367,7 +369,7 @@ async def get_app_usage_analytics(
                     "dailyLimit": app.daily_requests_limit,
                     "usagePercentage": usage_pct,
                     "maxRps": app.max_rps,
-                    "lastResetDate": app.last_reset_date,
+                    "lastResetDate": _fmt_dt(app.last_reset_date),
                 },
                 "hourlyBreakdown": hourly_data,
             },

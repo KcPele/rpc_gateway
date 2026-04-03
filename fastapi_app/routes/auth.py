@@ -18,6 +18,7 @@ from fastapi_app.schemas import (
     UpdatePasswordRequest,
     UserResponse,
 )
+from fastapi_app.utils.response import fmt_dt as _fmt_dt
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -28,8 +29,8 @@ def _user_response(user: User) -> dict:
         "email": user.email,
         "isAdmin": user.is_admin,
         "isActive": user.is_active,
-        "createdAt": user.created_at,
-        "updatedAt": user.updated_at,
+        "createdAt": _fmt_dt(user.created_at),
+        "updatedAt": _fmt_dt(user.updated_at),
     }
 
 
@@ -86,8 +87,8 @@ async def get_me(user: User = Depends(get_current_user)):
                 "id": str(user.id),
                 "email": user.email,
                 "isActive": user.is_active,
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at,
+                "createdAt": _fmt_dt(user.created_at),
+                "updatedAt": _fmt_dt(user.updated_at),
             }
         },
     }
@@ -102,8 +103,8 @@ async def get_account(user: User = Depends(get_current_user)):
                 "id": str(user.id),
                 "email": user.email,
                 "isActive": user.is_active,
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at,
+                "createdAt": _fmt_dt(user.created_at),
+                "updatedAt": _fmt_dt(user.updated_at),
             }
         },
     }
@@ -166,8 +167,8 @@ async def export_user_data(user: User = Depends(get_current_user)):
             "dailyRequests": a.daily_requests,
             "maxRps": a.max_rps,
             "dailyRequestsLimit": a.daily_requests_limit,
-            "createdAt": a.created_at,
-            "updatedAt": a.updated_at,
+            "createdAt": _fmt_dt(a.created_at),
+            "updatedAt": _fmt_dt(a.updated_at),
         }
         for a in apps
     ]

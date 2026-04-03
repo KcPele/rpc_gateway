@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from fastapi_app.utils.response import fmt_dt as _fmt_dt
+
 from beanie import PydanticObjectId
 from fastapi import HTTPException, Query, status
 
@@ -89,8 +91,8 @@ async def update_app_details(app_id: str, payload: dict) -> dict:
             "dailyRequests": app.daily_requests,
             "isActive": app.is_active,
             "apiKey": app.api_key,
-            "createdAt": app.created_at,
-            "updatedAt": app.updated_at,
+            "createdAt": _fmt_dt(app.created_at),
+            "updatedAt": _fmt_dt(app.updated_at),
         },
     }
 
@@ -142,8 +144,8 @@ async def update_user_details(user_id: str, payload: dict) -> dict:
         "email": target_user.email,
         "isAdmin": target_user.is_admin,
         "isActive": target_user.is_active,
-        "createdAt": target_user.created_at,
-        "updatedAt": target_user.updated_at,
+        "createdAt": _fmt_dt(target_user.created_at),
+        "updatedAt": _fmt_dt(target_user.updated_at),
     }
 
     return {
@@ -168,8 +170,8 @@ async def get_all_users(page: int = 1, limit: int = 10) -> dict:
                     "email": u.email,
                     "isAdmin": u.is_admin,
                     "isActive": u.is_active,
-                    "createdAt": u.created_at,
-                    "updatedAt": u.updated_at,
+                    "createdAt": _fmt_dt(u.created_at),
+                    "updatedAt": _fmt_dt(u.updated_at),
                 }
                 for u in users
             ],
@@ -202,6 +204,7 @@ async def get_all_apps(
                     "name": a.name,
                     "description": a.description,
                     "userId": a.user_id,
+                    "apiKey": a.api_key,
                     "chainName": a.chain_name,
                     "chainId": a.chain_id,
                     "maxRps": a.max_rps,
@@ -209,8 +212,8 @@ async def get_all_apps(
                     "requests": a.requests,
                     "dailyRequests": a.daily_requests,
                     "isActive": a.is_active,
-                    "createdAt": a.created_at,
-                    "updatedAt": a.updated_at,
+                    "createdAt": _fmt_dt(a.created_at),
+                    "updatedAt": _fmt_dt(a.updated_at),
                 }
                 for a in apps
             ],
@@ -241,8 +244,8 @@ async def get_default_app_settings() -> dict:
             "_id": str(settings_doc.id),
             "maxRps": settings_doc.max_rps,
             "dailyRequestsLimit": settings_doc.daily_requests_limit,
-            "createdAt": settings_doc.created_at,
-            "updatedAt": settings_doc.updated_at,
+            "createdAt": _fmt_dt(settings_doc.created_at),
+            "updatedAt": _fmt_dt(settings_doc.updated_at),
         },
     }
 
@@ -279,7 +282,7 @@ async def update_default_app_settings(payload: dict) -> dict:
             "_id": str(settings_doc.id),
             "maxRps": settings_doc.max_rps,
             "dailyRequestsLimit": settings_doc.daily_requests_limit,
-            "createdAt": settings_doc.created_at,
-            "updatedAt": settings_doc.updated_at,
+            "createdAt": _fmt_dt(settings_doc.created_at),
+            "updatedAt": _fmt_dt(settings_doc.updated_at),
         },
     }

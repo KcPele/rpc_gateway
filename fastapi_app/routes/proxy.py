@@ -32,7 +32,7 @@ async def _proxy_request(
     app_doc: dict | None = None,
     api_key: str | None = None,
 ):
-    url = target_url.rstrip("/") + request.url.path
+    url = target_url
     headers = {
         k: v
         for k, v in request.headers.items()
@@ -71,10 +71,18 @@ async def _proxy_request(
 
             record_rpc_metrics(user_id, api_key, rpc_method, endpoint_type, duration)
 
+        # Strip hop-by-hop and encoding headers — httpx decompresses automatically
+        # so forwarding content-encoding/transfer-encoding would cause double-decode.
+        skip = {
+            "content-encoding", "transfer-encoding", "content-length",
+            "connection", "keep-alive", "te", "trailers", "upgrade",
+        }
+        forwarded_headers = {k: v for k, v in resp.headers.items() if k.lower() not in skip}
+
         return Response(
             content=resp.content,
             status_code=resp.status_code,
-            headers=dict(resp.headers),
+            headers=forwarded_headers,
             media_type=resp.headers.get("content-type"),
         )
 
@@ -98,17 +106,9 @@ async def _proxy_request(
         )
 
 
-@router.api_route(
-    "/{chain}/exec/{key}/{path:path}",
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
-)
-async def proxy_execution(
-    request: Request,
-    response: Response,
-):
+async def _handle_execution(request: Request, response: Response, path: str = "") -> Response:
     chain_name = request.path_params.get("chain", "").lower()
     key = request.path_params.get("key", "")
-    path = request.path_params.get("path", "")
 
     chain_config = settings.get_chain_config(chain_name)
     if not chain_config or not chain_config.execution_rpc_url:
@@ -129,7 +129,7 @@ async def proxy_execution(
 
     await rate_limit(request, response)
 
-    target_url = selected_url.rstrip("/") + "/" + path
+    target_url = selected_url.rstrip("/") + ("/" + path if path else "")
     return await _proxy_request(
         request,
         response,
@@ -141,17 +141,9 @@ async def proxy_execution(
     )
 
 
-@router.api_route(
-    "/{chain}/cons/{key}/{path:path}",
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
-)
-async def proxy_consensus(
-    request: Request,
-    response: Response,
-):
+async def _handle_consensus(request: Request, response: Response, path: str = "") -> Response:
     chain_name = request.path_params.get("chain", "").lower()
     key = request.path_params.get("key", "")
-    path = request.path_params.get("path", "")
 
     chain_config = settings.get_chain_config(chain_name)
     if not chain_config or not chain_config.consensus_api_url:
@@ -172,7 +164,7 @@ async def proxy_consensus(
 
     await rate_limit(request, response)
 
-    target_url = selected_url.rstrip("/") + "/" + path
+    target_url = selected_url.rstrip("/") + ("/" + path if path else "")
     return await _proxy_request(
         request,
         response,
@@ -182,6 +174,40 @@ async def proxy_consensus(
         app_doc=app_doc,
         api_key=key,
     )
+
+
+@router.api_route(
+    "/{chain}/exec/{key}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+)
+async def proxy_execution_root(request: Request, response: Response):
+    return await _handle_execution(request, response, path="")
+
+
+@router.api_route(
+    "/{chain}/exec/{key}/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+)
+async def proxy_execution(request: Request, response: Response):
+    path = request.path_params.get("path", "")
+    return await _handle_execution(request, response, path=path)
+
+
+@router.api_route(
+    "/{chain}/cons/{key}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+)
+async def proxy_consensus_root(request: Request, response: Response):
+    return await _handle_consensus(request, response, path="")
+
+
+@router.api_route(
+    "/{chain}/cons/{key}/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+)
+async def proxy_consensus(request: Request, response: Response):
+    path = request.path_params.get("path", "")
+    return await _handle_consensus(request, response, path=path)
 
 
 @router.get("/health/{chain}")

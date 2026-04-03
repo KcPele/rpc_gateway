@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from datetime import datetime
+from typing import Generic, Optional, TypeVar
 
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -32,6 +33,17 @@ def error_response(
     if details is not None:
         body["details"] = details
     return JSONResponse(status_code=status_code, content=body)
+
+
+def fmt_dt(dt: Optional[datetime]) -> Optional[str]:
+    """Serialize datetime to JS-compatible ISO string (milliseconds, Z suffix).
+
+    Python's isoformat() emits microseconds (6 decimal places) which
+    JavaScript's Date constructor rejects → RangeError: Invalid time value.
+    """
+    if dt is None:
+        return None
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
 
 
 def _serialize(value: object) -> object:

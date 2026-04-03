@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from beanie import PydanticObjectId
+from fastapi_app.utils.response import fmt_dt as _fmt_dt
 from fastapi import HTTPException, Query, status
 
 from fastapi_app.database import App, Chain, DefaultAppSettings, User
@@ -122,8 +123,8 @@ async def list_chains() -> dict:
                 "chainId": int(c.chain_id) if c.chain_id.isdigit() else c.chain_id,
                 "isEnabled": c.is_enabled,
                 "adminNotes": c.admin_notes,
-                "createdAt": c.created_at,
-                "updatedAt": c.updated_at,
+                "createdAt": _fmt_dt(c.created_at),
+                "updatedAt": _fmt_dt(c.updated_at),
             }
             for c in chains
         ],
@@ -172,8 +173,8 @@ async def add_chain(payload: dict) -> dict:
             else new_chain.chain_id,
             "isEnabled": new_chain.is_enabled,
             "adminNotes": new_chain.admin_notes,
-            "createdAt": new_chain.created_at,
-            "updatedAt": new_chain.updated_at,
+            "createdAt": _fmt_dt(new_chain.created_at),
+            "updatedAt": _fmt_dt(new_chain.updated_at),
         },
     }
 
@@ -240,8 +241,8 @@ async def update_chain(chain_id: str, payload: dict) -> dict:
             else chain.chain_id,
             "isEnabled": chain.is_enabled,
             "adminNotes": chain.admin_notes,
-            "createdAt": chain.created_at,
-            "updatedAt": chain.updated_at,
+            "createdAt": _fmt_dt(chain.created_at),
+            "updatedAt": _fmt_dt(chain.updated_at),
         },
     }
 

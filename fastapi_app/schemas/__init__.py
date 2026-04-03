@@ -5,6 +5,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from fastapi_app.utils.response import fmt_dt as _fmt_dt
+
 
 # ── Auth schemas ──────────────────────────────────────────────────────────────
 
@@ -55,8 +57,8 @@ class AuthDataResponse(BaseModel):
                     "email": user.email,
                     "isAdmin": user.is_admin,
                     "isActive": user.is_active,
-                    "createdAt": user.created_at,
-                    "updatedAt": user.updated_at,
+                    "createdAt": _fmt_dt(user.created_at),
+                    "updatedAt": _fmt_dt(user.updated_at),
                 },
             },
         )
