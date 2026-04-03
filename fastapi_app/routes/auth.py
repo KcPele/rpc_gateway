@@ -22,15 +22,15 @@ from fastapi_app.schemas import (
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-def _user_response(user: User) -> UserResponse:
-    return UserResponse(
-        id=str(user.id),
-        email=user.email,
-        is_admin=user.is_admin,
-        is_active=user.is_active,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
+def _user_response(user: User) -> dict:
+    return {
+        "id": str(user.id),
+        "email": user.email,
+        "isAdmin": user.is_admin,
+        "isActive": user.is_active,
+        "createdAt": user.created_at,
+        "updatedAt": user.updated_at,
+    }
 
 
 def _create_token(user_id: str) -> str:
@@ -58,7 +58,7 @@ async def register_user(payload: RegisterRequest):
     await user.insert()
 
     token = _create_token(str(user.id))
-    return AuthDataResponse(success=True, token=token, user=_user_response(user))
+    return {"success": True, "data": {"token": token, "user": _user_response(user)}}
 
 
 @router.post("/login", response_model=AuthDataResponse)
@@ -71,17 +71,17 @@ async def login_user(payload: LoginRequest):
         )
 
     token = _create_token(str(user.id))
-    return AuthDataResponse(success=True, token=token, user=_user_response(user))
+    return {"success": True, "data": {"token": token, "user": _user_response(user)}}
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):
-    return _user_response(user)
+    return {"success": True, "data": _user_response(user)}
 
 
-@router.get("/account", response_model=UserResponse)
+@router.get("/account")
 async def get_account(user: User = Depends(get_current_user)):
-    return _user_response(user)
+    return {"success": True, "data": _user_response(user)}
 
 
 @router.patch("/password")

@@ -34,15 +34,32 @@ class UpdateEmailRequest(BaseModel):
 class UserResponse(BaseModel):
     id: str
     email: str
-    is_admin: bool = False
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    isAdmin: bool = False
+    isActive: bool = True
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class AuthDataResponse(BaseModel):
-    token: str
-    user: UserResponse
+    success: bool = True
+    data: dict
+
+    @classmethod
+    def create(cls, token: str, user) -> AuthDataResponse:
+        return cls(
+            success=True,
+            data={
+                "token": token,
+                "user": {
+                    "id": str(user.id),
+                    "email": user.email,
+                    "isAdmin": user.is_admin,
+                    "isActive": user.is_active,
+                    "createdAt": user.created_at,
+                    "updatedAt": user.updated_at,
+                },
+            },
+        )
 
 
 class ExportAppResponse(BaseModel):
