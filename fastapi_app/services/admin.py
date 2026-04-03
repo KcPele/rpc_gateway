@@ -143,7 +143,7 @@ async def add_chain(payload: dict) -> dict:
             detail="Missing required fields: name, chainId.",
         )
 
-    existing = await Chain.find_one((Chain.name == name) | (Chain.chain_id == chain_id))
+    existing = await Chain.find_one({"$or": [{"name": name}, {"chain_id": chain_id}]})
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
