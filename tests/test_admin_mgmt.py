@@ -101,7 +101,7 @@ class TestAdminUpdateUser:
             headers=auth_headers(admin_token),
         )
         assert response.status_code == 200
-        assert response.json()["data"]["is_active"] is False
+        assert response.json()["data"]["isActive"] is False
 
     @pytest.mark.asyncio
     async def test_update_user_not_found(
@@ -162,7 +162,7 @@ class TestAdminGetApps:
         assert response.status_code == 200
         data = response.json()
         for app_item in data["data"]["apps"]:
-            assert app_item["user_id"] == str(user.id)
+            assert app_item["userId"] == str(user.id)
 
     @pytest.mark.asyncio
     async def test_get_apps_non_admin(self, http_client: AsyncClient, user_token: str):
@@ -233,8 +233,8 @@ class TestDefaultAppSettings:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        assert "max_rps" in data["data"]
-        assert "daily_requests_limit" in data["data"]
+        assert "maxRps" in data["data"]
+        assert "dailyRequestsLimit" in data["data"]
 
     @pytest.mark.asyncio
     async def test_update_default_settings(
@@ -251,8 +251,8 @@ class TestDefaultAppSettings:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["data"]["max_rps"] == 50
-        assert data["data"]["daily_requests_limit"] == 50000
+        assert data["data"]["maxRps"] == 50
+        assert data["data"]["dailyRequestsLimit"] == 50000
 
     @pytest.mark.asyncio
     async def test_update_default_settings_snake_case(

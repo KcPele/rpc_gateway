@@ -19,44 +19,31 @@ class UpdateAppRequest(BaseModel):
 
 
 class AppResponse(BaseModel):
-    id: str
+    _id: str
     name: str
     description: Optional[str] = None
-    user_id: str
-    chain_name: str
-    chain_id: str
-    max_rps: int
-    daily_requests_limit: int
+    userId: str
+    chainName: str
+    chainId: str
+    maxRps: int
+    dailyRequestsLimit: int
     requests: int = 0
-    daily_requests: int = 0
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    dailyRequests: int = 0
+    isActive: bool = True
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
-class AppWithKeyResponse(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    user_id: str
-    api_key: str
-    chain_name: str
-    chain_id: str
-    max_rps: int
-    daily_requests_limit: int
-    requests: int = 0
-    daily_requests: int = 0
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+class AppWithKeyResponse(AppResponse):
+    apiKey: str
 
 
 class PaginationInfo(BaseModel):
-    current_page: int
-    total_pages: int
-    total_apps: int
-    has_next_page: bool
-    has_prev_page: bool
+    currentPage: int
+    totalPages: int
+    totalApps: int
+    hasNextPage: bool
+    hasPrevPage: bool
 
 
 class UserAppsResponse(BaseModel):
@@ -65,20 +52,20 @@ class UserAppsResponse(BaseModel):
 
 
 class DashboardStats(BaseModel):
-    total_apps: int
-    active_apps: int
-    total_requests: int
-    todays_requests: int
-    max_apps: int = 5
+    totalApps: int
+    activeApps: int
+    totalRequests: int
+    todaysRequests: int
+    maxApps: int = 5
 
 
 class UsageInfo(BaseModel):
-    total_requests: int
-    daily_requests: int
-    daily_limit: int
-    usage_percentage: int
-    max_rps: int
-    last_reset_date: Optional[datetime] = None
+    totalRequests: int
+    dailyRequests: int
+    dailyLimit: int
+    usagePercentage: int
+    maxRps: int
+    lastResetDate: Optional[datetime] = None
 
 
 class HourlyBreakdown(BaseModel):
@@ -89,25 +76,25 @@ class HourlyBreakdown(BaseModel):
 class AppUsageAnalytics(BaseModel):
     app: dict[str, Any]
     usage: UsageInfo
-    hourly_breakdown: list[HourlyBreakdown]
+    hourlyBreakdown: list[HourlyBreakdown]
 
 
 class AppSummary(BaseModel):
     id: str
     name: str
-    chain_name: str
-    total_requests: int
-    daily_requests: int
-    daily_limit: int
-    usage_percentage: int
-    is_active: bool
+    chainName: str
+    totalRequests: int
+    dailyRequests: int
+    dailyLimit: int
+    usagePercentage: int
+    isActive: bool
 
 
 class AllAppsUsageSummary(BaseModel):
-    total_apps: int
-    active_apps: int
-    total_requests: int
-    daily_requests: int
+    totalApps: int
+    activeApps: int
+    totalRequests: int
+    dailyRequests: int
 
 
 class AllAppsUsageAnalytics(BaseModel):

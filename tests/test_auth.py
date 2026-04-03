@@ -27,10 +27,10 @@ class TestRegister:
         )
         assert response.status_code == 201
         data = response.json()
-        assert "token" in data
-        assert data["user"]["email"] == "newuser@example.com"
-        assert data["user"]["is_admin"] is False
-        assert data["user"]["is_active"] is True
+        assert "token" in data["data"]
+        assert data["data"]["user"]["email"] == "newuser@example.com"
+        assert data["data"]["user"]["isAdmin"] is False
+        assert data["data"]["user"]["isActive"] is True
 
     @pytest.mark.asyncio
     async def test_register_duplicate_email(
@@ -89,8 +89,8 @@ class TestLogin:
         )
         assert response.status_code == 200
         data = response.json()
-        assert "token" in data
-        assert data["user"]["email"] == "login@example.com"
+        assert "token" in data["data"]
+        assert data["data"]["user"]["email"] == "login@example.com"
 
     @pytest.mark.asyncio
     async def test_login_wrong_password(self, http_client: AsyncClient, mongo_client):
@@ -123,7 +123,7 @@ class TestMe:
         response = await http_client.get("/auth/me", headers=auth_headers(token))
         assert response.status_code == 200
         data = response.json()
-        assert data["email"] == "test@example.com"
+        assert data["data"]["user"]["email"] == "test@example.com"
 
     @pytest.mark.asyncio
     async def test_me_unauthorized(self, http_client: AsyncClient):
@@ -150,7 +150,7 @@ class TestAccount:
         token = create_jwt_token(str(user.id))
         response = await http_client.get("/auth/account", headers=auth_headers(token))
         assert response.status_code == 200
-        assert response.json()["email"] == "test@example.com"
+        assert response.json()["data"]["user"]["email"] == "test@example.com"
 
 
 class TestUpdatePassword:

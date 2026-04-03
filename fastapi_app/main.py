@@ -4,9 +4,13 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException as FastAPIHTTPException
 
 from fastapi_app.config.settings import settings
 from fastapi_app.database import close_mongo, connect_to_mongo, health_check
@@ -28,6 +32,29 @@ app = FastAPI(
     version="1.0.0",
     description="Multi-tenant RPC gateway for node access",
     lifespan=lifespan,
+)
+
+
+@app.exception_handler(FastAPIHTTPException)
+async def custom_http_exception_handler(request: Request, exc: FastAPIHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail},
+    )
+
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://nodebridge.xyz",
+        "https://apps.nodebridge.xyz",
+        "http://localhost:3000",
+        "http://localhost:7001",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register routers (routers already include their own path prefixes)

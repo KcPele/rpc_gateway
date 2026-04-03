@@ -21,13 +21,13 @@ class UpdateChainRequest(BaseModel):
 
 
 class ChainResponse(BaseModel):
-    id: str
+    _id: str
     name: str
-    chain_id: str
-    is_enabled: bool
-    admin_notes: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    chainId: int
+    isEnabled: bool
+    adminNotes: Optional[str] = None
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class AdminUpdateAppRequest(BaseModel):
@@ -52,11 +52,11 @@ class AdminUpdateUserRequest(BaseModel):
 
 
 class DefaultAppSettingsResponse(BaseModel):
-    id: str
-    max_rps: int
-    daily_requests_limit: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    _id: str
+    maxRps: int
+    dailyRequestsLimit: int
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class UpdateDefaultAppSettingsRequest(BaseModel):
@@ -69,7 +69,7 @@ class PaginatedUsersResponse(BaseModel):
     total: int
     page: int
     limit: int
-    total_pages: int
+    totalPages: int
 
 
 class PaginatedAppsResponse(BaseModel):
@@ -77,7 +77,7 @@ class PaginatedAppsResponse(BaseModel):
     total: int
     page: int
     limit: int
-    total_pages: int
+    totalPages: int
 
 
 class NodeHealthCheck(BaseModel):

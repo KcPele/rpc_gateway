@@ -47,7 +47,7 @@ class TestCreateApp:
         data = response.json()
         assert data["success"] is True
         assert data["data"]["name"] == "My App"
-        assert data["data"]["chain_name"] == "ethereum"
+        assert data["data"]["chainName"] == "ethereum"
 
     @pytest.mark.asyncio
     async def test_create_app_chain_not_found(
@@ -126,7 +126,7 @@ class TestGetUserApps:
         assert response.status_code == 200
         data = response.json()
         assert len(data["data"]["apps"]) == 2
-        assert data["data"]["pagination"]["current_page"] == 1
+        assert data["data"]["pagination"]["currentPage"] == 1
 
 
 class TestDashboardStats:
@@ -146,8 +146,8 @@ class TestDashboardStats:
         data = response.json()
         assert data["success"] is True
         stats = data["data"]["stats"]
-        assert stats["total_apps"] == 1
-        assert "max_apps" in stats
+        assert stats["totalApps"] == 1
+        assert "maxApps" in stats
 
 
 class TestGetSingleApp:
@@ -165,7 +165,7 @@ class TestGetSingleApp:
         )
         assert response.status_code == 200
         data = response.json()
-        assert "api_key" in data["data"]
+        assert "apiKey" in data["data"]
 
     @pytest.mark.asyncio
     async def test_get_app_not_found(
@@ -315,7 +315,7 @@ class TestAppUsage:
         data = response.json()
         assert data["success"] is True
         assert "analytics" in data["data"]
-        assert "hourly_breakdown" in data["data"]["analytics"]
+        assert "hourlyBreakdown" in data["data"]["analytics"]
 
     @pytest.mark.asyncio
     async def test_all_apps_usage(

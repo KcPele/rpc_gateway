@@ -66,21 +66,21 @@ class ExportAppResponse(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    chain_name: str
-    chain_id: str
-    is_active: bool
+    chainName: str
+    chainId: str
+    isActive: bool
     requests: int
-    daily_requests: int
-    max_rps: int
-    daily_requests_limit: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    dailyRequests: int
+    maxRps: int
+    dailyRequestsLimit: int
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class ExportDataResponse(BaseModel):
     user: UserResponse
     apps: list[ExportAppResponse]
-    export_date: datetime
+    exportDate: datetime
 
 
 # ── App schemas ───────────────────────────────────────────────────────────────
@@ -99,44 +99,33 @@ class UpdateAppRequest(BaseModel):
 
 
 class AppResponse(BaseModel):
-    id: str
+    _id: str
+    userId: str
     name: str
     description: Optional[str] = None
-    user_id: str
-    chain_name: str
-    chain_id: str
-    max_rps: int
-    daily_requests_limit: int
+    apiKey: Optional[str] = None
+    chainName: str
+    chainId: str
+    isActive: bool = True
     requests: int = 0
-    daily_requests: int = 0
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    dailyRequests: int = 0
+    maxRps: int
+    dailyRequestsLimit: int
+    lastResetDate: Optional[datetime] = None
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
-class AppWithKeyResponse(BaseModel):
-    id: str
-    name: str
-    description: Optional[str] = None
-    user_id: str
-    api_key: str
-    chain_name: str
-    chain_id: str
-    max_rps: int
-    daily_requests_limit: int
-    requests: int = 0
-    daily_requests: int = 0
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+class AppWithKeyResponse(AppResponse):
+    pass
 
 
 class PaginationInfo(BaseModel):
-    current_page: int
-    total_pages: int
-    total_apps: int
-    has_next_page: bool
-    has_prev_page: bool
+    currentPage: int
+    totalPages: int
+    totalApps: int
+    hasNextPage: bool
+    hasPrevPage: bool
 
 
 class UserAppsResponse(BaseModel):
@@ -145,20 +134,20 @@ class UserAppsResponse(BaseModel):
 
 
 class DashboardStats(BaseModel):
-    total_apps: int
-    active_apps: int
-    total_requests: int
-    todays_requests: int
-    max_apps: int = 5
+    totalApps: int
+    activeApps: int
+    totalRequests: int
+    todaysRequests: int
+    maxApps: int = 5
 
 
 class UsageInfo(BaseModel):
-    total_requests: int
-    daily_requests: int
-    daily_limit: int
-    usage_percentage: int
-    max_rps: int
-    last_reset_date: Optional[datetime] = None
+    totalRequests: int
+    dailyRequests: int
+    dailyLimit: int
+    usagePercentage: int
+    maxRps: int
+    lastResetDate: Optional[datetime] = None
 
 
 class HourlyBreakdown(BaseModel):
@@ -169,25 +158,25 @@ class HourlyBreakdown(BaseModel):
 class AppUsageAnalytics(BaseModel):
     app: dict[str, Any]
     usage: UsageInfo
-    hourly_breakdown: list[HourlyBreakdown]
+    hourlyBreakdown: list[HourlyBreakdown]
 
 
 class AppSummary(BaseModel):
     id: str
     name: str
-    chain_name: str
-    total_requests: int
-    daily_requests: int
-    daily_limit: int
-    usage_percentage: int
-    is_active: bool
+    chainName: str
+    totalRequests: int
+    dailyRequests: int
+    dailyLimit: int
+    usagePercentage: int
+    isActive: bool
 
 
 class AllAppsUsageSummary(BaseModel):
-    total_apps: int
-    active_apps: int
-    total_requests: int
-    daily_requests: int
+    totalApps: int
+    activeApps: int
+    totalRequests: int
+    dailyRequests: int
 
 
 class AllAppsUsageAnalytics(BaseModel):
@@ -213,13 +202,13 @@ class UpdateChainRequest(BaseModel):
 
 
 class ChainResponse(BaseModel):
-    id: str
+    _id: str
     name: str
-    chain_id: str
-    is_enabled: bool
-    admin_notes: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    chainId: int
+    isEnabled: bool
+    adminNotes: Optional[str] = None
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class AdminUpdateAppRequest(BaseModel):
@@ -244,11 +233,11 @@ class AdminUpdateUserRequest(BaseModel):
 
 
 class DefaultAppSettingsResponse(BaseModel):
-    id: str
-    max_rps: int
-    daily_requests_limit: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    _id: str
+    maxRps: int
+    dailyRequestsLimit: int
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class UpdateDefaultAppSettingsRequest(BaseModel):
@@ -261,7 +250,7 @@ class PaginatedUsersResponse(BaseModel):
     total: int
     page: int
     limit: int
-    total_pages: int
+    totalPages: int
 
 
 class PaginatedAppsResponse(BaseModel):
@@ -269,7 +258,7 @@ class PaginatedAppsResponse(BaseModel):
     total: int
     page: int
     limit: int
-    total_pages: int
+    totalPages: int
 
 
 class NodeHealthCheck(BaseModel):

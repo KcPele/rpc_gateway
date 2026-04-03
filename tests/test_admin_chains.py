@@ -208,7 +208,7 @@ class TestUpdateChain:
                 headers=auth_headers(admin_token),
             )
             assert response.status_code == 200
-            assert response.json()["data"]["is_enabled"] is False
+            assert response.json()["data"]["isEnabled"] is False
 
     @pytest.mark.asyncio
     async def test_update_chain_not_found(

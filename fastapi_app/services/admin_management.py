@@ -75,7 +75,22 @@ async def update_app_details(app_id: str, payload: dict) -> dict:
     return {
         "success": True,
         "message": "App details updated successfully.",
-        "data": app.model_dump(),
+        "data": {
+            "_id": str(app.id),
+            "name": app.name,
+            "description": app.description,
+            "userId": app.user_id,
+            "chainName": app.chain_name,
+            "chainId": app.chain_id,
+            "maxRps": app.max_rps,
+            "dailyRequestsLimit": app.daily_requests_limit,
+            "requests": app.requests,
+            "dailyRequests": app.daily_requests,
+            "isActive": app.is_active,
+            "apiKey": app.api_key,
+            "createdAt": app.created_at,
+            "updatedAt": app.updated_at,
+        },
     }
 
 
@@ -107,13 +122,11 @@ async def update_user_details(user_id: str, payload: dict) -> dict:
         )
 
     if "password" in filtered:
-        from fastapi_app.database import pwd_context
-
         if "email" in filtered:
             target_user.email = filtered.pop("email")
         if "is_active" in filtered:
             target_user.is_active = filtered.pop("is_active")
-        target_user.password = pwd_context.hash(filtered.pop("password"))
+        target_user.password = User.hash_password(filtered.pop("password"))
         await target_user.save()
     else:
         for key, value in filtered.items():
@@ -122,12 +135,12 @@ async def update_user_details(user_id: str, payload: dict) -> dict:
         await target_user.save()
 
     user_obj = {
-        "id": str(target_user.id),
+        "_id": str(target_user.id),
         "email": target_user.email,
-        "is_admin": target_user.is_admin,
-        "is_active": target_user.is_active,
-        "created_at": target_user.created_at,
-        "updated_at": target_user.updated_at,
+        "isAdmin": target_user.is_admin,
+        "isActive": target_user.is_active,
+        "createdAt": target_user.created_at,
+        "updatedAt": target_user.updated_at,
     }
 
     return {
@@ -148,12 +161,12 @@ async def get_all_users(page: int = 1, limit: int = 10) -> dict:
         "data": {
             "users": [
                 {
-                    "id": str(u.id),
+                    "_id": str(u.id),
                     "email": u.email,
-                    "is_admin": u.is_admin,
-                    "is_active": u.is_active,
-                    "created_at": u.created_at,
-                    "updated_at": u.updated_at,
+                    "isAdmin": u.is_admin,
+                    "isActive": u.is_active,
+                    "createdAt": u.created_at,
+                    "updatedAt": u.updated_at,
                 }
                 for u in users
             ],
@@ -182,19 +195,19 @@ async def get_all_apps(
         "data": {
             "apps": [
                 {
-                    "id": str(a.id),
+                    "_id": str(a.id),
                     "name": a.name,
                     "description": a.description,
-                    "user_id": a.user_id,
-                    "chain_name": a.chain_name,
-                    "chain_id": a.chain_id,
-                    "max_rps": a.max_rps,
-                    "daily_requests_limit": a.daily_requests_limit,
+                    "userId": a.user_id,
+                    "chainName": a.chain_name,
+                    "chainId": a.chain_id,
+                    "maxRps": a.max_rps,
+                    "dailyRequestsLimit": a.daily_requests_limit,
                     "requests": a.requests,
-                    "daily_requests": a.daily_requests,
-                    "is_active": a.is_active,
-                    "created_at": a.created_at,
-                    "updated_at": a.updated_at,
+                    "dailyRequests": a.daily_requests,
+                    "isActive": a.is_active,
+                    "createdAt": a.created_at,
+                    "updatedAt": a.updated_at,
                 }
                 for a in apps
             ],
@@ -222,11 +235,11 @@ async def get_default_app_settings() -> dict:
     return {
         "success": True,
         "data": {
-            "id": str(settings_doc.id),
-            "max_rps": settings_doc.max_rps,
-            "daily_requests_limit": settings_doc.daily_requests_limit,
-            "created_at": settings_doc.created_at,
-            "updated_at": settings_doc.updated_at,
+            "_id": str(settings_doc.id),
+            "maxRps": settings_doc.max_rps,
+            "dailyRequestsLimit": settings_doc.daily_requests_limit,
+            "createdAt": settings_doc.created_at,
+            "updatedAt": settings_doc.updated_at,
         },
     }
 
@@ -260,10 +273,10 @@ async def update_default_app_settings(payload: dict) -> dict:
     return {
         "success": True,
         "data": {
-            "id": str(settings_doc.id),
-            "max_rps": settings_doc.max_rps,
-            "daily_requests_limit": settings_doc.daily_requests_limit,
-            "created_at": settings_doc.created_at,
-            "updated_at": settings_doc.updated_at,
+            "_id": str(settings_doc.id),
+            "maxRps": settings_doc.max_rps,
+            "dailyRequestsLimit": settings_doc.daily_requests_limit,
+            "createdAt": settings_doc.created_at,
+            "updatedAt": settings_doc.updated_at,
         },
     }

@@ -29,33 +29,50 @@ class UpdateEmailRequest(BaseModel):
 class UserResponse(BaseModel):
     id: str
     email: str
-    is_admin: bool = False
-    is_active: bool = True
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    isAdmin: bool = False
+    isActive: bool = True
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class AuthDataResponse(BaseModel):
-    token: str
-    user: UserResponse
+    success: bool = True
+    data: dict
+
+    @classmethod
+    def create(cls, token: str, user) -> "AuthDataResponse":
+        return cls(
+            success=True,
+            data={
+                "token": token,
+                "user": {
+                    "id": str(user.id),
+                    "email": user.email,
+                    "isAdmin": user.is_admin,
+                    "isActive": user.is_active,
+                    "createdAt": user.created_at,
+                    "updatedAt": user.updated_at,
+                },
+            },
+        )
 
 
 class ExportAppResponse(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
-    chain_name: str
-    chain_id: str
-    is_active: bool
+    chainName: str
+    chainId: str
+    isActive: bool
     requests: int
-    daily_requests: int
-    max_rps: int
-    daily_requests_limit: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    dailyRequests: int
+    maxRps: int
+    dailyRequestsLimit: int
+    createdAt: Optional[datetime] = None
+    updatedAt: Optional[datetime] = None
 
 
 class ExportDataResponse(BaseModel):
     user: UserResponse
     apps: list[ExportAppResponse]
-    export_date: datetime
+    exportDate: datetime

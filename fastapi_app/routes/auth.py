@@ -42,16 +42,19 @@ def _create_token(user_id: str) -> str:
     )
 
 
-@router.post("/register", response_model=AuthDataResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=AuthDataResponse, status_code=status.HTTP_201_CREATED
+)
 async def register_user(payload: RegisterRequest):
     existing = await User.find_one(User.email == payload.email)
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email is already registered")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Email is already registered"
+        )
 
     user = User(
         email=payload.email,
         password=User.hash_password(payload.password),
-        name=payload.name,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -76,16 +79,40 @@ async def login_user(payload: LoginRequest):
 
 @router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):
-    return {"success": True, "data": _user_response(user)}
+    return {
+        "success": True,
+        "data": {
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "isActive": user.is_active,
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at,
+            }
+        },
+    }
 
 
 @router.get("/account")
 async def get_account(user: User = Depends(get_current_user)):
-    return {"success": True, "data": _user_response(user)}
+    return {
+        "success": True,
+        "data": {
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "isActive": user.is_active,
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at,
+            }
+        },
+    }
 
 
 @router.patch("/password")
-async def update_password(payload: UpdatePasswordRequest, user: User = Depends(get_current_user)):
+async def update_password(
+    payload: UpdatePasswordRequest, user: User = Depends(get_current_user)
+):
     if not user.verify_password(payload.current_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -100,7 +127,9 @@ async def update_password(payload: UpdatePasswordRequest, user: User = Depends(g
 
 
 @router.patch("/email")
-async def update_email(payload: UpdateEmailRequest, user: User = Depends(get_current_user)):
+async def update_email(
+    payload: UpdateEmailRequest, user: User = Depends(get_current_user)
+):
     if not user.verify_password(payload.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -130,12 +159,15 @@ async def export_user_data(user: User = Depends(get_current_user)):
             "id": str(a.id),
             "name": a.name,
             "description": a.description,
-            "chain_name": a.chain_name,
-            "is_active": a.is_active,
+            "chainName": a.chain_name,
+            "chainId": a.chain_id,
+            "isActive": a.is_active,
             "requests": a.requests,
-            "daily_requests": a.daily_requests,
-            "created_at": a.created_at,
-            "updated_at": a.updated_at,
+            "dailyRequests": a.daily_requests,
+            "maxRps": a.max_rps,
+            "dailyRequestsLimit": a.daily_requests_limit,
+            "createdAt": a.created_at,
+            "updatedAt": a.updated_at,
         }
         for a in apps
     ]
@@ -145,6 +177,6 @@ async def export_user_data(user: User = Depends(get_current_user)):
         "data": {
             "user": _user_response(user),
             "apps": apps_data,
-            "export_date": datetime.now(timezone.utc),
+            "exportDate": datetime.now(timezone.utc),
         },
     }

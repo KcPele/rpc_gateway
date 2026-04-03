@@ -10,62 +10,48 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from fastapi_app.database import App, Chain, DefaultAppSettings, User
 from fastapi_app.middleware.auth import get_current_user
-from fastapi_app.schemas.app import (
-    AllAppsUsageAnalytics,
-    AllAppsUsageSummary,
-    AppResponse,
-    AppSummary,
-    AppUsageAnalytics,
-    AppWithKeyResponse,
-    CreateAppRequest,
-    DashboardStats,
-    HourlyBreakdown,
-    PaginationInfo,
-    UpdateAppRequest,
-    UsageInfo,
-    UserAppsResponse,
-)
+from fastapi_app.schemas.app import CreateAppRequest, UpdateAppRequest
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 
 MAX_APPS_PER_USER = 5
 
 
-def _app_response(app: App) -> AppResponse:
-    return AppResponse(
-        id=str(app.id),
-        name=app.name,
-        description=app.description,
-        user_id=app.user_id,
-        chain_name=app.chain_name,
-        chain_id=app.chain_id,
-        max_rps=app.max_rps,
-        daily_requests_limit=app.daily_requests_limit,
-        requests=app.requests,
-        daily_requests=app.daily_requests,
-        is_active=app.is_active,
-        created_at=app.created_at,
-        updated_at=app.updated_at,
-    )
+def _app_dict(app: App) -> dict:
+    return {
+        "_id": str(app.id),
+        "name": app.name,
+        "description": app.description,
+        "userId": app.user_id,
+        "chainName": app.chain_name,
+        "chainId": app.chain_id,
+        "maxRps": app.max_rps,
+        "dailyRequestsLimit": app.daily_requests_limit,
+        "requests": app.requests,
+        "dailyRequests": app.daily_requests,
+        "isActive": app.is_active,
+        "createdAt": app.created_at,
+        "updatedAt": app.updated_at,
+    }
 
 
-def _app_with_key_response(app: App) -> AppWithKeyResponse:
-    return AppWithKeyResponse(
-        id=str(app.id),
-        name=app.name,
-        description=app.description,
-        user_id=app.user_id,
-        api_key=app.api_key,
-        chain_name=app.chain_name,
-        chain_id=app.chain_id,
-        max_rps=app.max_rps,
-        daily_requests_limit=app.daily_requests_limit,
-        requests=app.requests,
-        daily_requests=app.daily_requests,
-        is_active=app.is_active,
-        created_at=app.created_at,
-        updated_at=app.updated_at,
-    )
+def _app_with_key_dict(app: App) -> dict:
+    return {
+        "_id": str(app.id),
+        "name": app.name,
+        "description": app.description,
+        "userId": app.user_id,
+        "apiKey": app.api_key,
+        "chainName": app.chain_name,
+        "chainId": app.chain_id,
+        "maxRps": app.max_rps,
+        "dailyRequestsLimit": app.daily_requests_limit,
+        "requests": app.requests,
+        "dailyRequests": app.daily_requests,
+        "isActive": app.is_active,
+        "createdAt": app.created_at,
+        "updatedAt": app.updated_at,
+    }
 
 
 async def _get_default_limits() -> tuple[int, int]:
@@ -119,7 +105,7 @@ async def create_app(
     return {
         "success": True,
         "message": "App created successfully.",
-        "data": _app_response(new_app),
+        "data": _app_dict(new_app),
     }
 
 
@@ -143,16 +129,16 @@ async def get_user_apps(
     return {
         "success": True,
         "message": "User applications retrieved successfully.",
-        "data": UserAppsResponse(
-            apps=[_app_response(a) for a in apps],
-            pagination=PaginationInfo(
-                current_page=page,
-                total_pages=total_pages,
-                total_apps=total_apps,
-                has_next_page=page < total_pages,
-                has_prev_page=page > 1,
-            ),
-        ),
+        "data": {
+            "apps": [_app_dict(a) for a in apps],
+            "pagination": {
+                "currentPage": page,
+                "totalPages": total_pages,
+                "totalApps": total_apps,
+                "hasNextPage": page < total_pages,
+                "hasPrevPage": page > 1,
+            },
+        },
     }
 
 
@@ -173,13 +159,13 @@ async def get_dashboard_stats(
         "success": True,
         "message": "Dashboard statistics retrieved successfully.",
         "data": {
-            "stats": DashboardStats(
-                total_apps=total_apps,
-                active_apps=active_apps,
-                total_requests=total_requests,
-                todays_requests=todays_requests,
-                max_apps=MAX_APPS_PER_USER,
-            ),
+            "stats": {
+                "totalApps": total_apps,
+                "activeApps": active_apps,
+                "totalRequests": total_requests,
+                "todaysRequests": todays_requests,
+                "maxApps": MAX_APPS_PER_USER,
+            },
         },
     }
 
@@ -204,33 +190,33 @@ async def get_all_apps_usage(
             else 0
         )
         apps_summary.append(
-            AppSummary(
-                id=str(app.id),
-                name=app.name,
-                chain_name=app.chain_name,
-                total_requests=app.requests,
-                daily_requests=app.daily_requests,
-                daily_limit=app.daily_requests_limit,
-                usage_percentage=usage_pct,
-                is_active=app.is_active,
-            )
+            {
+                "id": str(app.id),
+                "name": app.name,
+                "chainName": app.chain_name,
+                "totalRequests": app.requests,
+                "dailyRequests": app.daily_requests,
+                "dailyLimit": app.daily_requests_limit,
+                "usagePercentage": usage_pct,
+                "isActive": app.is_active,
+            }
         )
 
-    apps_summary.sort(key=lambda a: a.daily_requests, reverse=True)
+    apps_summary.sort(key=lambda a: a["dailyRequests"], reverse=True)
 
     return {
         "success": True,
         "message": "Usage analytics retrieved successfully.",
         "data": {
-            "analytics": AllAppsUsageAnalytics(
-                summary=AllAppsUsageSummary(
-                    total_apps=len(apps),
-                    active_apps=active_apps,
-                    total_requests=total_requests,
-                    daily_requests=daily_requests,
-                ),
-                apps=apps_summary,
-            ),
+            "analytics": {
+                "summary": {
+                    "totalApps": len(apps),
+                    "activeApps": active_apps,
+                    "totalRequests": total_requests,
+                    "dailyRequests": daily_requests,
+                },
+                "apps": apps_summary,
+            },
         },
     }
 
@@ -252,7 +238,7 @@ async def get_user_app(
     return {
         "success": True,
         "message": "App retrieved successfully.",
-        "data": _app_with_key_response(app),
+        "data": _app_with_key_dict(app),
     }
 
 
@@ -281,7 +267,7 @@ async def update_user_app(
     return {
         "success": True,
         "message": "App updated successfully.",
-        "data": _app_response(app),
+        "data": _app_dict(app),
     }
 
 
@@ -355,31 +341,31 @@ async def get_app_usage_analytics(
     avg_per_hour = app.daily_requests / 24 if app.daily_requests > 0 else 0
     for i in range(24):
         hourly_data.append(
-            HourlyBreakdown(
-                hour=i,
-                requests=int(avg_per_hour),
-            )
+            {
+                "hour": i,
+                "requests": int(avg_per_hour),
+            }
         )
 
     return {
         "success": True,
         "message": "App usage analytics retrieved successfully.",
         "data": {
-            "analytics": AppUsageAnalytics(
-                app={
+            "analytics": {
+                "app": {
                     "id": str(app.id),
                     "name": app.name,
-                    "chain_name": app.chain_name,
+                    "chainName": app.chain_name,
                 },
-                usage=UsageInfo(
-                    total_requests=app.requests,
-                    daily_requests=app.daily_requests,
-                    daily_limit=app.daily_requests_limit,
-                    usage_percentage=usage_pct,
-                    max_rps=app.max_rps,
-                    last_reset_date=app.last_reset_date,
-                ),
-                hourly_breakdown=hourly_data,
-            ),
+                "usage": {
+                    "totalRequests": app.requests,
+                    "dailyRequests": app.daily_requests,
+                    "dailyLimit": app.daily_requests_limit,
+                    "usagePercentage": usage_pct,
+                    "maxRps": app.max_rps,
+                    "lastResetDate": app.last_reset_date,
+                },
+                "hourlyBreakdown": hourly_data,
+            },
         },
     }

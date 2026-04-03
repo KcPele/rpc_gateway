@@ -117,13 +117,13 @@ async def list_chains() -> dict:
         "success": True,
         "data": [
             {
-                "id": str(c.id),
+                "_id": str(c.id),
                 "name": c.name,
-                "chain_id": c.chain_id,
-                "is_enabled": c.is_enabled,
-                "admin_notes": c.admin_notes,
-                "created_at": c.created_at,
-                "updated_at": c.updated_at,
+                "chainId": int(c.chain_id) if c.chain_id.isdigit() else c.chain_id,
+                "isEnabled": c.is_enabled,
+                "adminNotes": c.admin_notes,
+                "createdAt": c.created_at,
+                "updatedAt": c.updated_at,
             }
             for c in chains
         ],
@@ -162,13 +162,15 @@ async def add_chain(payload: dict) -> dict:
         "success": True,
         "message": "Chain added successfully.",
         "data": {
-            "id": str(new_chain.id),
+            "_id": str(new_chain.id),
             "name": new_chain.name,
-            "chain_id": new_chain.chain_id,
-            "is_enabled": new_chain.is_enabled,
-            "admin_notes": new_chain.admin_notes,
-            "created_at": new_chain.created_at,
-            "updated_at": new_chain.updated_at,
+            "chainId": int(new_chain.chain_id)
+            if new_chain.chain_id.isdigit()
+            else new_chain.chain_id,
+            "isEnabled": new_chain.is_enabled,
+            "adminNotes": new_chain.admin_notes,
+            "createdAt": new_chain.created_at,
+            "updatedAt": new_chain.updated_at,
         },
     }
 
@@ -227,13 +229,15 @@ async def update_chain(chain_id: str, payload: dict) -> dict:
         "success": True,
         "message": "Chain updated successfully.",
         "data": {
-            "id": str(chain.id),
+            "_id": str(chain.id),
             "name": chain.name,
-            "chain_id": chain.chain_id,
-            "is_enabled": chain.is_enabled,
-            "admin_notes": chain.admin_notes,
-            "created_at": chain.created_at,
-            "updated_at": chain.updated_at,
+            "chainId": int(chain.chain_id)
+            if chain.chain_id.isdigit()
+            else chain.chain_id,
+            "isEnabled": chain.is_enabled,
+            "adminNotes": chain.admin_notes,
+            "createdAt": chain.created_at,
+            "updatedAt": chain.updated_at,
         },
     }
 
