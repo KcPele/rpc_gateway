@@ -20,6 +20,6 @@ COPY fastapi_app/ ./fastapi_app/
 RUN useradd --create-home --shell /bin/bash appuser
 USER appuser
 
-EXPOSE 3000
+EXPOSE 8881
 
-CMD ["uvicorn", "fastapi_app.main:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["uvicorn", "fastapi_app.main:app", "--host", "0.0.0.0", "--port", "8881"]

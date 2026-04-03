@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
 import motor.motor_asyncio
 from beanie import Document, init_beanie

@@ -53,7 +53,7 @@ async def validate_api_key(request: Request) -> dict[str, Any]:
         app_doc["id"] = str(app.id)
         _cached_apps[key] = (app_doc, now)
 
-    if app_doc.get("chain_name", "").lower() != requested_chain:
+    if (app_doc.get("chain_name", "")).lower() != requested_chain:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"API key is not valid for chain '{requested_chain}'",

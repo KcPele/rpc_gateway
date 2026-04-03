@@ -3,6 +3,9 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 
 from fastapi_app.config.settings import settings

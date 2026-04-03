@@ -51,7 +51,7 @@ def _discover_chains() -> dict[str, ChainConfig]:
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    port: int = 8888
+    port: int = 8881
     host: str = "0.0.0.0"
     jwt_secret: str
     mongo_uri: str
