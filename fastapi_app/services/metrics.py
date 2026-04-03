@@ -3,6 +3,9 @@ from __future__ import annotations
 import httpx
 from prometheus_client import Counter, Gauge, Histogram, generate_latest
 
+# Shared client for health checks — avoids creating a new connection pool each call.
+_health_client = httpx.AsyncClient(timeout=10.0)
+
 from fastapi_app.config.settings import settings
 
 http_requests_total = Counter(
@@ -139,53 +142,41 @@ async def update_ethereum_node_metrics(chain_name: str) -> None:
 
     if exec_urls:
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.post(
-                    exec_urls[0],
-                    json={
-                        "jsonrpc": "2.0",
-                        "method": "eth_syncing",
-                        "params": [],
-                        "id": 1,
-                    },
-                )
-                data = resp.json()
-                result = data.get("result")
-                node_execution_syncing.set(0 if result is False else 1)
-                exec_ok = True
+            resp = await _health_client.post(
+                exec_urls[0],
+                json={"jsonrpc": "2.0", "method": "eth_syncing", "params": [], "id": 1},
+            )
+            result = resp.json().get("result")
+            node_execution_syncing.set(0 if result is False else 1)
+            exec_ok = True
         except Exception:
             node_execution_syncing.set(1)
 
     if cons_urls:
         try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.get(f"{cons_urls[0]}/eth/v1/node/syncing")
-                sync_data = resp.json().get("data", {})
-                node_consensus_syncing.set(1 if sync_data.get("is_syncing") else 0)
-                head_slot = sync_data.get("head_slot", "0")
-                try:
-                    node_consensus_head_slot.set(int(head_slot))
-                except (ValueError, TypeError):
-                    pass
-                cons_ok = True
+            resp = await _health_client.get(f"{cons_urls[0]}/eth/v1/node/syncing")
+            sync_data = resp.json().get("data", {})
+            node_consensus_syncing.set(1 if sync_data.get("is_syncing") else 0)
+            try:
+                node_consensus_head_slot.set(int(sync_data.get("head_slot", 0)))
+            except (ValueError, TypeError):
+                pass
+            cons_ok = True
         except Exception:
             pass
 
     if prom_urls:
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                resp = await client.get(f"{prom_urls[0]}/metrics")
-                text = resp.text
-                node_prometheus_metrics_available.set(1)
-                prom_ok = True
-
-                gc = _extract_metric_value(text, "go_gc_cycles_total_gc_cycles_total")
-                if gc is not None:
-                    node_runtime_gc_cycles.set(gc)
-
-                heap = _extract_metric_value(text, "go_gc_heap_allocs_bytes_total")
-                if heap is not None:
-                    node_runtime_heap_allocs.set(heap)
+            resp = await _health_client.get(f"{prom_urls[0]}/metrics")
+            text = resp.text
+            node_prometheus_metrics_available.set(1)
+            prom_ok = True
+            gc = _extract_metric_value(text, "go_gc_cycles_total_gc_cycles_total")
+            if gc is not None:
+                node_runtime_gc_cycles.set(gc)
+            heap = _extract_metric_value(text, "go_gc_heap_allocs_bytes_total")
+            if heap is not None:
+                node_runtime_heap_allocs.set(heap)
         except Exception:
             node_prometheus_metrics_available.set(0)
 

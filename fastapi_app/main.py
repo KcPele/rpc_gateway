@@ -23,7 +23,13 @@ from fastapi_app.routes.admin import router as admin_router
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await connect_to_mongo()
+    from fastapi_app.middleware.api_key import start_flush_task, stop_flush_task
+    from fastapi_app.middleware.rate_limit import start_cleanup_task, stop_cleanup_interval
+    start_flush_task()
+    start_cleanup_task()
     yield
+    stop_flush_task()
+    stop_cleanup_interval()
     await close_mongo()
 
 

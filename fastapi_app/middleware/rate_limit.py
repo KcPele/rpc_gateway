@@ -26,8 +26,25 @@ def get_rate_limit_status(api_key: str) -> dict[str, Any] | None:
     }
 
 
+_cleanup_task: "asyncio.Task | None" = None
+
+
+def start_cleanup_task() -> None:
+    import asyncio
+    global _cleanup_task
+    if _cleanup_task is None or _cleanup_task.done():
+        async def _loop() -> None:
+            while True:
+                await asyncio.sleep(_MAX_AGE_S)
+                _cleanup_old_buckets()
+        _cleanup_task = asyncio.create_task(_loop())
+
+
 def stop_cleanup_interval() -> None:
-    pass
+    global _cleanup_task
+    if _cleanup_task and not _cleanup_task.done():
+        _cleanup_task.cancel()
+        _cleanup_task = None
 
 
 async def rate_limit(request: Request, response: Response) -> dict[str, Any] | None:

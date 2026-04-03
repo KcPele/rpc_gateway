@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import random
 from datetime import datetime, timezone
 
@@ -60,16 +61,17 @@ async def _proxy_request(
 
         if app_doc and api_key:
             user_id = app_doc.get("user_id", "unknown")
-            rpc_method = "unknown"
-            try:
-                import json
 
-                req_body = json.loads(body)
-                rpc_method = req_body.get("method", "unknown")
-            except Exception:
-                pass
+            async def _emit_metrics(b: bytes, uid: str, key: str, etype: str, dur: float) -> None:
+                rpc_method = "unknown"
+                try:
+                    import json
+                    rpc_method = json.loads(b).get("method", "unknown")
+                except Exception:
+                    pass
+                record_rpc_metrics(uid, key, rpc_method, etype, dur)
 
-            record_rpc_metrics(user_id, api_key, rpc_method, endpoint_type, duration)
+            asyncio.create_task(_emit_metrics(body, user_id, api_key, endpoint_type, duration))
 
         # Strip hop-by-hop and encoding headers — httpx decompresses automatically
         # so forwarding content-encoding/transfer-encoding would cause double-decode.

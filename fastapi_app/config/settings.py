@@ -58,9 +58,14 @@ class Settings(BaseSettings):
     default_max_rps: int = 10
     default_daily_requests: int = 10000
 
+    # Cached once at startup — env vars don't change at runtime.
+    _chains: dict[str, ChainConfig] = {}
+
     @property
     def chains(self) -> dict[str, ChainConfig]:
-        return _discover_chains()
+        if not self._chains:
+            object.__setattr__(self, "_chains", _discover_chains())
+        return self._chains
 
     def get_chain_config(self, chain_name: str) -> Optional[ChainConfig]:
         return self.chains.get(chain_name.lower())
