@@ -25,7 +25,7 @@ async def user_token(mongo_client) -> str:
 
 
 class TestCreateApp:
-    """Tests for POST /apps/."""
+    """Tests for POST /apps."""
 
     @pytest.mark.asyncio
     async def test_create_app_success(
@@ -34,7 +34,7 @@ class TestCreateApp:
         """Creating an app with valid data returns 201."""
         token, user_id = user_token
         response = await http_client.post(
-            "/apps/",
+            "/apps",
             json={
                 "name": "My App",
                 "description": "A test application",
@@ -56,7 +56,7 @@ class TestCreateApp:
         """Creating an app for a non-existent chain returns 404."""
         token, user_id = user_token
         response = await http_client.post(
-            "/apps/",
+            "/apps",
             json={
                 "name": "Bad App",
                 "chain_name": "nonexistent",
@@ -73,7 +73,7 @@ class TestCreateApp:
         """Creating an app without auth returns 401."""
         await seed_chain(name="ethereum", chain_id="1")
         response = await http_client.post(
-            "/apps/",
+            "/apps",
             json={
                 "name": "No Auth App",
                 "chain_name": "ethereum",
@@ -96,7 +96,7 @@ class TestCreateApp:
                 chain_id="1",
             )
         response = await http_client.post(
-            "/apps/",
+            "/apps",
             json={
                 "name": "Sixth App",
                 "chain_name": "ethereum",
@@ -108,7 +108,7 @@ class TestCreateApp:
 
 
 class TestGetUserApps:
-    """Tests for GET /apps/."""
+    """Tests for GET /apps."""
 
     @pytest.mark.asyncio
     async def test_get_user_apps_pagination(
@@ -121,7 +121,7 @@ class TestGetUserApps:
             await seed_app(user_id=str(user.id), name=f"Page App {i}")
         token = create_jwt_token(str(user.id))
         response = await http_client.get(
-            "/apps/?page=1&limit=2", headers=auth_headers(token)
+            "/apps?page=1&limit=2", headers=auth_headers(token)
         )
         assert response.status_code == 200
         data = response.json()

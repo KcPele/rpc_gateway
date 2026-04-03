@@ -63,7 +63,7 @@ async def _get_default_limits() -> tuple[int, int]:
     return app_max_rps, app_daily_limit
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_app(
     payload: CreateAppRequest,
     user: User = Depends(get_current_user),
@@ -109,7 +109,7 @@ async def create_app(
     }
 
 
-@router.get("/")
+@router.get("")
 async def get_user_apps(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
